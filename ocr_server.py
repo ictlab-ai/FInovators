@@ -35,7 +35,6 @@ def ocr_file():
         text = pytesseract.image_to_string(img, lang=OCR_LANG)
         for line in text.splitlines():
             if line.strip():
-                # Разделяем колонки по табуляции или пробелам
                 columns = [col.strip() for col in line.split('\t')]
                 if len(columns) == 1:
                     columns = line.split()
@@ -50,4 +49,6 @@ def ocr_file():
     )
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+    import os
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
