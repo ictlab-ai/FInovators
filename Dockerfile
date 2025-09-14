@@ -1,6 +1,7 @@
+# Используем базовый образ Ubuntu 22.04
 FROM ubuntu:22.04
 
-# Устанавливаем зависимости
+# --- Устанавливаем системные зависимости ---
 RUN apt-get update && \
     apt-get install -y \
         python3 \
@@ -15,20 +16,20 @@ RUN apt-get update && \
         && apt-get clean \
         && rm -rf /var/lib/apt/lists/*
 
+# --- Рабочая директория ---
 WORKDIR /app
 
-# Копируем Python-приложение
+# --- Копируем Python-приложение ---
 COPY ocr_server.py /app
 
-# Устанавливаем Python-библиотеки
-RUN pip3 install --no-cache-dir flask
-
+# --- Устанавливаем Python-библиотеки ---
 RUN pip3 install --no-cache-dir flask pillow
 
-# Создаём папку для загрузок
+# --- Создаём папку для загрузок ---
 RUN mkdir -p /app/uploads
 
-# Открываем порт (можно переопределить через Env Variable на Render)
+# --- Открываем порт Flask ---
 EXPOSE 5000
 
+# --- Запуск приложения ---
 CMD ["python3", "ocr_server.py"]
