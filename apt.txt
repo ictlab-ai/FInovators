@@ -1,6 +1,0 @@
-cmake
-build-essential
-ninja-build
-pkg-config
-python3-dev
-libgl1
