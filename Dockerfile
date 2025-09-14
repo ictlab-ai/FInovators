@@ -37,9 +37,8 @@ RUN pip3 install --no-cache-dir flask pillow pytesseract pdf2image
 # Папка для загруженных файлов
 RUN mkdir -p /app/uploads
 
-# Экспонируем порт Render (по умолчанию 5000)
+# Экспонируем порт Render
 EXPOSE 5000
 
-# Запуск сервера через Python напрямую
-# Flask внутри ocr_server.py подхватывает PORT через os.environ
+# Запуск сервера напрямую через Python
 CMD ["python3", "ocr_server.py"]
