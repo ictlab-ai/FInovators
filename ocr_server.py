@@ -9,7 +9,7 @@ UPLOAD_FOLDER = "uploads"
 OCR_PORT = 5000
 
 # Языки для распознавания
-OCR_LANG = "rus+kaz+eng"
+OCR_LANG = "ruseng"
 
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
