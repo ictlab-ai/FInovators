@@ -5,3 +5,5 @@ transformers
 numpy
 Pillow
 git+https://github.com/rednote-hilab/dots.ocr.git
+flask
+git+https://github.com/ictlab-ai/dots.ocr.git
