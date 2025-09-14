@@ -4,7 +4,7 @@ FROM ubuntu:22.04
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=Europe/Moscow
 
-# Устанавливаем системные зависимости и Tesseract с нужными языками
+# Системные зависимости и Tesseract с языками
 RUN apt-get update && \
     apt-get install -y \
         tzdata \
@@ -37,8 +37,9 @@ RUN pip3 install --no-cache-dir flask pillow pytesseract pdf2image
 # Папка для загруженных файлов
 RUN mkdir -p /app/uploads
 
-# Экспонируем порт Render
+# Экспонируем порт Render (по умолчанию 5000)
 EXPOSE 5000
 
 # Запуск сервера через Python напрямую
+# Flask внутри ocr_server.py подхватывает PORT через os.environ
 CMD ["python3", "ocr_server.py"]
