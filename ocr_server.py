@@ -1,22 +1,20 @@
 from flask import Flask, request, jsonify
-import subprocess
 import os
 from PIL import Image
+import pytesseract
 
 app = Flask(__name__)
 
 UPLOAD_FOLDER = "uploads"
+OCR_LANG = "rus+kaz+eng"
 OCR_PORT = 5000
-
-# Языки для распознавания
-OCR_LANG = "ruseng"
 
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-# --- Главная страница для проверки ---
+# --- Главная страница ---
 @app.route("/", methods=["GET"])
 def index():
-    return "OCR сервер работает. Для распознавания используйте POST на /ocr"
+    return "Tesseract OCR сервер работает. Для распознавания используйте POST на /ocr"
 
 # --- Эндпоинт для распознавания ---
 @app.route("/ocr", methods=["POST"])
@@ -32,36 +30,25 @@ def ocr_image():
     try:
         img = Image.open(filepath)
         img = img.convert("L")  # оттенки серого
-        bw_path = os.path.splitext(filepath)[0] + "_bw.png"
-        img.save(bw_path)
-        filepath = bw_path
     except Exception as e:
         return jsonify({"error": f"Image conversion failed: {e}"}), 500
 
-    # Запуск Cuneiform
     try:
-        result = subprocess.run(
-            ["cuneiform", "-l", OCR_LANG, "-f", "text", filepath],
-            capture_output=True,
-            text=True
-        )
-        text = result.stdout.strip()
+        # Распознаем текст через Tesseract
+        text = pytesseract.image_to_string(img, lang=OCR_LANG)
+        text = text.strip()
         if not text:
-            text = "[Cuneiform не распознал текст]"
+            text = "[Tesseract не распознал текст]"
         return jsonify({"text": text})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# --- Новый маршрут для проверки доступных языков ---
+# --- Список поддерживаемых языков ---
 @app.route("/langs", methods=["GET"])
 def langs():
     try:
-        result = subprocess.run(
-            ["cuneiform", "-l"],  # список языков
-            capture_output=True,
-            text=True
-        )
-        return "<pre>" + result.stdout + "</pre>"
+        langs = pytesseract.get_languages()
+        return "<pre>" + "\n".join(langs) + "</pre>"
     except Exception as e:
         return str(e)
 
