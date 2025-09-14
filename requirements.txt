@@ -1,4 +1,4 @@
 flask
 torch
 transformers
-git+https://github.com/dotsOCR/dots.git
+git+https://github.com/ictlab-ai/dots.ocr.git
