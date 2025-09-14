@@ -4,7 +4,12 @@ import os
 
 app = Flask(__name__)
 
-UPLOAD_FOLDER = "uploads"
+# Настройки через Environment Variables
+UPLOAD_FOLDER = os.getenv("UPLOAD_FOLDER", "uploads")
+OCR_PORT = int(os.getenv("OCR_PORT", 5000))
+OCR_LANG = os.getenv("OCR_LANG", "rus")
+
+# Создаём папку для загрузок, если нет
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 @app.route("/ocr", methods=["POST"])
@@ -18,7 +23,7 @@ def ocr_image():
 
     try:
         result = subprocess.run(
-            ["cuneiform", "-l", "rus", "-f", "text", filepath],
+            ["cuneiform", "-l", OCR_LANG, "-f", "text", filepath],
             capture_output=True,
             text=True
         )
@@ -28,4 +33,4 @@ def ocr_image():
         return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+    app.run(host="0.0.0.0", port=OCR_PORT)
