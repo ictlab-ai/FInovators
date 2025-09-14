@@ -1,6 +1,6 @@
 FROM ubuntu:22.04
 
-# Устанавливаем системные зависимости и Tesseract с нужными языками
+# Системные зависимости и Tesseract
 RUN apt-get update && \
     apt-get install -y \
         python3 \
@@ -12,6 +12,7 @@ RUN apt-get update && \
         tesseract-ocr-eng \
         libtesseract-dev \
         libleptonica-dev \
+        poppler-utils \
         python3-pil \
         python3-opencv \
         curl \
@@ -24,8 +25,8 @@ WORKDIR /app
 # Копируем Python-приложение
 COPY ocr_server.py /app
 
-# Устанавливаем Python-библиотеки
-RUN pip3 install --no-cache-dir flask pillow pytesseract
+# Python-библиотеки
+RUN pip3 install --no-cache-dir flask pillow pytesseract pdf2image
 
 # Папка для загруженных файлов
 RUN mkdir -p /app/uploads
