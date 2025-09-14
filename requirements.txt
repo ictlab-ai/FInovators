@@ -1,4 +1,7 @@
-flask
-torch
+torch==2.7.0
+torchvision==0.22.0
+torchaudio==2.7.0
 transformers
-git+https://github.com/ictlab-ai/dots.ocr.git
+numpy
+Pillow
+git+https://github.com/rednote-hilab/dots.ocr.git
