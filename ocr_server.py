@@ -1,7 +1,10 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_file
 import os
 from PIL import Image
 import pytesseract
+from pdf2image import convert_from_path
+import csv
+import io
 
 app = Flask(__name__)
 
@@ -11,39 +14,59 @@ OCR_PORT = 5000
 
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-# --- Главная страница ---
 @app.route("/", methods=["GET"])
 def index():
     return "Tesseract OCR сервер работает. Для распознавания используйте POST на /ocr"
 
-# --- Эндпоинт для распознавания ---
 @app.route("/ocr", methods=["POST"])
-def ocr_image():
-    if "image" not in request.files:
-        return jsonify({"error": "No image provided"}), 400
+def ocr_file():
+    if "file" not in request.files:
+        return jsonify({"error": "No file provided"}), 400
 
-    file = request.files["image"]
+    file = request.files["file"]
     filepath = os.path.join(UPLOAD_FOLDER, file.filename)
     file.save(filepath)
 
-    # Конвертация изображения в ч/б PNG
-    try:
-        img = Image.open(filepath)
-        img = img.convert("L")  # оттенки серого
-    except Exception as e:
-        return jsonify({"error": f"Image conversion failed: {e}"}), 500
+    ext = file.filename.lower().split('.')[-1]
+    pages = []
 
     try:
-        # Распознаем текст через Tesseract
+        if ext == "pdf":
+            images = convert_from_path(filepath)
+            for img in images:
+                img = img.convert("L")
+                pages.append(img)
+        else:
+            img = Image.open(filepath)
+            img = img.convert("L")
+            pages.append(img)
+    except Exception as e:
+        return jsonify({"error": f"File conversion failed: {e}"}), 500
+
+    all_text = []
+    for img in pages:
         text = pytesseract.image_to_string(img, lang=OCR_LANG)
-        text = text.strip()
-        if not text:
-            text = "[Tesseract не распознал текст]"
-        return jsonify({"text": text})
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        all_text.append(text)
 
-# --- Список поддерживаемых языков ---
+    csv_output = io.StringIO()
+    writer = csv.writer(csv_output)
+    for page_text in all_text:
+        for line in page_text.splitlines():
+            if line.strip():
+                columns = [col.strip() for col in line.split('\t')]
+                if len(columns) == 1:
+                    columns = line.split()
+                writer.writerow(columns)
+
+    csv_output.seek(0)
+
+    return send_file(
+        io.BytesIO(csv_output.getvalue().encode('utf-8')),
+        mimetype='text/csv',
+        as_attachment=True,
+        download_name="output.csv"
+    )
+
 @app.route("/langs", methods=["GET"])
 def langs():
     try:
