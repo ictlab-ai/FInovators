@@ -4,7 +4,7 @@ FROM ubuntu:22.04
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=Europe/Moscow
 
-# Устанавливаем системные зависимости и Tesseract с нужными языками
+# Устанавливаем системные зависимости и Tesseract с языками
 RUN apt-get update && \
     apt-get install -y \
         tzdata \
@@ -22,8 +22,8 @@ RUN apt-get update && \
         python3-opencv \
         curl \
         wget \
-        && apt-get clean \
-        && rm -rf /var/lib/apt/lists/*
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 # Рабочая папка
 WORKDIR /app
@@ -37,6 +37,8 @@ RUN pip3 install --no-cache-dir flask pillow pytesseract pdf2image
 # Папка для загруженных файлов
 RUN mkdir -p /app/uploads
 
+# Экспонируем порт, который Render задаёт через переменную PORT
 EXPOSE 5000
 
-CMD ["python3", "ocr_server.py"]
+# Команда запуска: берём порт из переменной среды PORT, дефолт 5000
+CMD ["sh", "-c", "flask run --host=0.0.0.0 --port=${PORT:-5000}"]
