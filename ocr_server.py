@@ -1,4 +1,4 @@
-from flask import Flask, request, send_file
+from flask import Flask, request, send_file, jsonify
 import os, io, csv
 from PIL import Image
 import pytesseract
@@ -14,7 +14,7 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 def root():
     return {"status": "ok"}
 
-# OCR endpoint
+# OCR endpoint (возвращает CSV)
 @app.route("/ocr", methods=["POST"])
 def ocr_file():
     if "file" not in request.files:
@@ -53,6 +53,17 @@ def ocr_file():
         as_attachment=True,
         download_name="output.csv"
     )
+
+# OCR тестовый endpoint (возвращает текст сразу)
+@app.route("/ocr_test", methods=["POST"])
+def ocr_test():
+    if "file" not in request.files:
+        return jsonify({"error": "No file provided"}), 400
+
+    file = request.files["file"]
+    img = Image.open(file)
+    text = pytesseract.image_to_string(img, lang=OCR_LANG)
+    return jsonify({"text": text})
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
