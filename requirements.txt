@@ -1,5 +1,5 @@
 flask
-torch==2.2.2
-torchvision==0.17.2
-opencv-python-headless==4.9.0.80
+torch==2.5.1
+torchvision==0.20.1
+opencv-python-headless==4.10.0.84
 git+https://github.com/ictlab-ai/dots.ocr.git
