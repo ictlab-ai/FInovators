@@ -52,5 +52,18 @@ def ocr_image():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+# --- Новый маршрут для проверки доступных языков ---
+@app.route("/langs", methods=["GET"])
+def langs():
+    try:
+        result = subprocess.run(
+            ["cuneiform", "-l"],  # список языков
+            capture_output=True,
+            text=True
+        )
+        return "<pre>" + result.stdout + "</pre>"
+    except Exception as e:
+        return str(e)
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=OCR_PORT)
