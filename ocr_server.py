@@ -9,12 +9,12 @@ UPLOAD_FOLDER = "uploads"
 OCR_LANG = "rus+kaz+eng"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-# Тестовый endpoint для проверки, что сервер жив
+# Проверка доступности сервера
 @app.route("/")
 def root():
     return {"status": "ok"}
 
-# Основной OCR endpoint
+# OCR endpoint
 @app.route("/ocr", methods=["POST"])
 def ocr_file():
     if "file" not in request.files:
