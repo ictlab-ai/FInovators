@@ -15,8 +15,9 @@ RUN apt-get update && \
         && apt-get clean \
         && rm -rf /var/lib/apt/lists/*
 
-# Копируем Python-приложение
 WORKDIR /app
+
+# Копируем Python-приложение
 COPY ocr_server.py /app
 
 # Устанавливаем Python-библиотеки
@@ -25,6 +26,7 @@ RUN pip3 install --no-cache-dir flask
 # Создаём папку для загрузок
 RUN mkdir -p /app/uploads
 
+# Открываем порт (можно переопределить через Env Variable на Render)
 EXPOSE 5000
 
 CMD ["python3", "ocr_server.py"]
