@@ -1,10 +1,9 @@
 FROM ubuntu:22.04
 
-# Отключаем интерактивные вопросы при установке
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=Europe/Moscow
 
-# Системные зависимости и Tesseract с языками
+# Системные зависимости + Tesseract
 RUN apt-get update && \
     apt-get install -y \
         tzdata \
@@ -25,20 +24,14 @@ RUN apt-get update && \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Рабочая папка
 WORKDIR /app
 
-# Копируем Python-приложение
 COPY ocr_server.py /app
 
-# Устанавливаем Python-библиотеки
 RUN pip3 install --no-cache-dir flask pillow pytesseract pdf2image
 
-# Папка для загруженных файлов
 RUN mkdir -p /app/uploads
 
-# Экспонируем порт Render
 EXPOSE 5000
 
-# Запуск сервера напрямую через Python
 CMD ["python3", "ocr_server.py"]
