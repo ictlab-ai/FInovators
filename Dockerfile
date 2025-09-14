@@ -23,6 +23,8 @@ COPY ocr_server.py /app
 # Устанавливаем Python-библиотеки
 RUN pip3 install --no-cache-dir flask
 
+RUN pip3 install --no-cache-dir flask pillow
+
 # Создаём папку для загрузок
 RUN mkdir -p /app/uploads
 
