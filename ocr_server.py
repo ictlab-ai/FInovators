@@ -1,21 +1,15 @@
 from flask import Flask, request, jsonify
-from PIL import Image
-import pytesseract
-from pdf2image import convert_from_path
+import subprocess
 import os
 
 app = Flask(__name__)
-
 UPLOAD_FOLDER = "uploads"
-OCR_LANG = "rus+kaz+eng"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-# Проверка сервера
 @app.route("/health", methods=["GET"])
 def health():
     return {"status": "ok"}
 
-# Основной OCR endpoint
 @app.route("/ocr", methods=["POST"])
 def ocr_file():
     if "file" not in request.files:
@@ -24,24 +18,27 @@ def ocr_file():
     file = request.files["file"]
     filepath = os.path.join(UPLOAD_FOLDER, file.filename)
     file.save(filepath)
+    output_file = filepath + ".txt"
+
     ext = file.filename.lower().split('.')[-1]
-
-    pages = []
+    # Если PDF, конвертируем в PNG
     if ext == "pdf":
-        images = convert_from_path(filepath)
-        for img in images:
-            pages.append(img.convert("L"))
+        png_file = filepath + ".png"
+        subprocess.run(["convert", "-density", "300", filepath, png_file], check=True)
+        input_file = png_file
     else:
-        img = Image.open(filepath)
-        pages.append(img.convert("L"))
+        input_file = filepath
 
-    # Собираем текст со всех страниц
-    full_text = ""
-    for img in pages:
-        text = pytesseract.image_to_string(img, lang=OCR_LANG)
-        full_text += text + "\n"
+    # Запускаем Cuneiform
+    cmd = ["cuneiform", "-l", "rus+eng", "-o", output_file, input_file]
+    result = subprocess.run(cmd, capture_output=True)
 
-    return jsonify({"text": full_text.strip()})
+    if os.path.exists(output_file):
+        with open(output_file, "r", encoding="utf-8") as f:
+            text = f.read()
+        return jsonify({"text": text})
+    else:
+        return jsonify({"error": "OCR failed", "stderr": result.stderr.decode()}), 500
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
