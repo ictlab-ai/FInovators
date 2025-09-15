@@ -30,7 +30,7 @@ def ocr_file():
         input_file = filepath
 
     # Запускаем Cuneiform
-    cmd = ["cuneiform", "-l", "rus+eng", "-o", output_file, input_file]
+    cmd = ["cuneiform", "-l", "ruseng", "-o", output_file, input_file]
     result = subprocess.run(cmd, capture_output=True)
 
     if os.path.exists(output_file):
